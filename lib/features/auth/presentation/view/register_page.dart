@@ -83,7 +83,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     SnackBar(content: Text(state.message)),
                   );
                 } else if (state is AuthAuthenticated) {
-                  context.go('/'); // Navigate to home page
+                  context.go('/');
                 }
               },
               builder: (context, state) {

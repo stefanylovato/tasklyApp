@@ -16,7 +16,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw Exception(e.code);
     } catch (e) {
-      throw Exception('Falha no login: $e');
+      throw Exception('Login failed: $e');
     }
   }
 
@@ -31,12 +31,12 @@ class AuthRepositoryImpl implements AuthRepository {
         await userCredential.user!.updateProfile(displayName: name);
         await userCredential.user!.reload();
       } else {
-        throw Exception('Usuário não criado');
+        throw Exception('User not created');
       }
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw Exception(e.code);
     } catch (e) {
-      throw Exception('Falha no registro: $e');
+      throw Exception('Registration failed: $e');
     }
   }
 
@@ -45,7 +45,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _firebaseAuth.signOut();
     } catch (e) {
-      throw Exception('Falha no logout: $e');
+      throw Exception('Logout failed: $e');
     }
   }
 

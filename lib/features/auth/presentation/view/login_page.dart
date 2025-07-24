@@ -38,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
                     SnackBar(content: Text(state.message)),
                   );
                 } else if (state is AuthAuthenticated) {
-                  context.go('/'); // Navigate to home page
+                  context.go('/');
                 }
               },
               builder: (context, state) {
