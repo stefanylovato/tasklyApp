@@ -33,27 +33,29 @@ class TasklyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authRepository = AuthRepositoryImpl();
+    final taskRepository = TaskRepositoryImpl();
     return MultiBlocProvider(
       providers: [
         BlocProvider(
           create: (context) => AuthBloc(
-            login: Login(AuthRepositoryImpl()),
-            register: Register(AuthRepositoryImpl()),
-            logout: Logout(AuthRepositoryImpl()),
-            persistLogin: PersistLogin(AuthRepositoryImpl()),
+            login: Login(authRepository),
+            register: Register(authRepository),
+            logout: Logout(authRepository),
+            persistLogin: PersistLogin(authRepository),
           )..add(AuthCheckStatusEvent()),
         ),
         BlocProvider(
           create: (context) => TaskBloc(
-            createTask: CreateTask(TaskRepositoryImpl()),
-            getTasks: GetTasks(TaskRepositoryImpl()),
-            updateTask: UpdateTask(TaskRepositoryImpl()),
-            deleteTask: DeleteTask(TaskRepositoryImpl()),
-            createCategory: CreateCategory(TaskRepositoryImpl()),
-            getCategories: GetCategories(TaskRepositoryImpl()),
-            updateCategory: UpdateCategory(TaskRepositoryImpl()),
-            deleteCategory: DeleteCategory(TaskRepositoryImpl()),
-            uploadMedia: UploadMedia(TaskRepositoryImpl()),
+            createTask: CreateTask(taskRepository),
+            getTasks: GetTasks(taskRepository),
+            updateTask: UpdateTask(taskRepository),
+            deleteTask: DeleteTask(taskRepository),
+            createCategory: CreateCategory(taskRepository),
+            getCategories: GetCategories(taskRepository),
+            updateCategory: UpdateCategory(taskRepository),
+            deleteCategory: DeleteCategory(taskRepository),
+            uploadMedia: UploadMedia(taskRepository),
           ),
         ),
       ],
