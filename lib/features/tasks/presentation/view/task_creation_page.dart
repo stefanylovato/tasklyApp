@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:taskly/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:taskly/features/auth/presentation/blocs/auth_state.dart';
 import 'package:taskly/features/tasks/domain/entities/task_entity.dart';
 import 'package:taskly/features/tasks/domain/entities/category_entity.dart';
-import 'package:go_router/go_router.dart';
 import 'package:taskly/features/tasks/presentation/blocs/task_bloc.dart';
 import 'package:taskly/features/tasks/presentation/blocs/task_event.dart';
 import 'package:taskly/features/tasks/presentation/blocs/task_state.dart';
@@ -45,8 +45,6 @@ class _TaskCreationPageState extends State<TaskCreationPage>
       if (widget.taskId != null) {
         context.read<TaskBloc>().add(LoadTaskByIdEvent(widget.taskId!, userId));
       }
-    } else {
-      context.go('/login');
     }
   }
 
@@ -208,11 +206,11 @@ class _TaskCreationPageState extends State<TaskCreationPage>
               ),
             ),
           );
-          Future.delayed(const Duration(milliseconds: 500), () {
-            if (mounted) {
-              context.go('/');
-            }
-          });
+          if (GoRouter.of(context).canPop()) {
+            GoRouter.of(context).pop();
+          } else {
+            GoRouter.of(context).go('/');
+          }
         }
       },
       child: Scaffold(
@@ -222,7 +220,11 @@ class _TaskCreationPageState extends State<TaskCreationPage>
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
-              context.go('/');
+              if (GoRouter.of(context).canPop()) {
+                GoRouter.of(context).pop();
+              } else {
+                GoRouter.of(context).go('/');
+              }
             },
           ),
         ),
@@ -382,18 +384,48 @@ class _TaskCreationPageState extends State<TaskCreationPage>
                     spacing: 8,
                     runSpacing: 8,
                     children: _mediaFiles
+                        .asMap()
+                        .entries
                         .map(
-                          (file) => Image.file(
-                            file,
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
+                          (entry) => Stack(
+                            children: [
+                              Image.file(
+                                entry.value,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _mediaFiles.removeAt(entry.key);
+                                    });
+                                  },
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         )
                         .toList(),
                   ),
                   const SizedBox(height: 16),
                   BlocBuilder<TaskBloc, TaskState>(
+                    buildWhen: (previous, current) =>
+                        previous is TaskLoading != current is TaskLoading,
                     builder: (context, state) {
                       return ElevatedButton(
                         onPressed: _isSaving || state is TaskLoading
@@ -402,23 +434,11 @@ class _TaskCreationPageState extends State<TaskCreationPage>
                                 context: context,
                                 onSuccess: () {
                                   if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          widget.taskId == null
-                                              ? 'Task created'
-                                              : 'Task updated',
-                                        ),
-                                      ),
-                                    );
-                                    Future.delayed(
-                                      const Duration(milliseconds: 500),
-                                      () {
-                                        if (mounted) {
-                                          context.go('/');
-                                        }
-                                      },
-                                    );
+                                    if (GoRouter.of(context).canPop()) {
+                                      GoRouter.of(context).pop();
+                                    } else {
+                                      GoRouter.of(context).go('/');
+                                    }
                                   }
                                 },
                                 onError: (message) {
