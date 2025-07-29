@@ -63,7 +63,39 @@ class TasklyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         routerConfig: router,
         title: 'Taskly',
-        theme: ThemeData(primarySwatch: Colors.orange),
+        theme: ThemeData(
+          primarySwatch: Colors.orange,
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+            ),
+          ),
+          outlinedButtonTheme: OutlinedButtonThemeData(
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.grey[200],
+              foregroundColor: Colors.orange,
+              side: BorderSide(color: Colors.orange),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+            ),
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.orange,
+            ),
+          ),
+          scaffoldBackgroundColor: Colors.grey[300],
+          appBarTheme: AppBarTheme(
+            backgroundColor: Colors.orange,
+            foregroundColor: Colors.white,
+            elevation: 0,
+          ),
+        ),
       ),
     );
   }

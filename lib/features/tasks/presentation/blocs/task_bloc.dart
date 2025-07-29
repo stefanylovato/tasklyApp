@@ -292,17 +292,23 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     if (currentState is TaskLoaded) {
       final query = event.query.toLowerCase();
       final filteredTasks = currentState.tasks.where((task) {
-        return task.title.toLowerCase().contains(query) ||
-            task.description.toLowerCase().contains(query) ||
-            (task.categoryName.toLowerCase().contains(query)) ||
-            task.status
-                .toString()
-                .split('.')
-                .last
-                .toLowerCase()
-                .contains(query);
+        return task.userId == event.userId &&
+            (task.title.toLowerCase().contains(query) ||
+                task.description.toLowerCase().contains(query) ||
+                (task.categoryName.toLowerCase().contains(query)) ||
+                task.status
+                    .toString()
+                    .split('.')
+                    .last
+                    .toLowerCase()
+                    .contains(query));
       }).toList();
-      emit(currentState.copyWith(filteredTasks: filteredTasks));
+      emit(
+        currentState.copyWith(
+          filteredTasks: filteredTasks,
+          operationCompleted: null,
+        ),
+      );
     } else {}
   }
 }

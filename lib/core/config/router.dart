@@ -28,11 +28,6 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const TaskCreationPage(),
     ),
     GoRoute(
-      path: '/task-creation/:taskId',
-      builder: (context, state) =>
-          TaskCreationPage(taskId: state.pathParameters['taskId']),
-    ),
-    GoRoute(
       path: '/category-management',
       builder: (context, state) => const CategoryManagementPage(),
     ),

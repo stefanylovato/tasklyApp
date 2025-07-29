@@ -362,7 +362,7 @@ class _TaskCreationPageState extends State<TaskCreationPage>
                     },
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
+                  OutlinedButton(
                     onPressed: () => _pickMedia(
                       onSuccess: () {},
                       onError: (message) {
@@ -372,11 +372,6 @@ class _TaskCreationPageState extends State<TaskCreationPage>
                           );
                         }
                       },
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
                     ),
                     child: const Text('Pick Image from Gallery'),
                   ),

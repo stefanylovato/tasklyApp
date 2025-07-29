@@ -95,9 +95,10 @@ class LoadTaskByIdEvent extends TaskEvent {
 
 class FilterTasksEvent extends TaskEvent {
   final String query;
+  final String userId;
 
-  const FilterTasksEvent(this.query);
+  const FilterTasksEvent(this.query, this.userId);
 
   @override
-  List<Object> get props => [query];
+  List<Object> get props => [query, userId];
 }
