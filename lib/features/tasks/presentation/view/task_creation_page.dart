@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:taskly/core/widgets/button_widget.dart';
+import 'package:taskly/core/widgets/text_field_widget.dart';
 import 'package:taskly/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:taskly/features/auth/presentation/blocs/auth_state.dart';
 import 'package:taskly/features/tasks/domain/entities/task_entity.dart';
@@ -11,6 +12,7 @@ import 'package:taskly/features/tasks/presentation/blocs/task_event.dart';
 import 'package:taskly/features/tasks/presentation/blocs/task_state.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:io';
+import 'package:taskly/features/tasks/presentation/view/components/media_picker_widget.dart';
 
 class TaskCreationPage extends StatefulWidget {
   final String? taskId;
@@ -56,32 +58,7 @@ class _TaskCreationPageState extends State<TaskCreationPage>
     super.dispose();
   }
 
-  Future<void> _pickMedia({
-    required VoidCallback onSuccess,
-    required void Function(String message) onError,
-  }) async {
-    try {
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-      if (pickedFile != null) {
-        final file = File(pickedFile.path);
-        if (await file.exists()) {
-          setState(() {
-            _mediaFiles.add(file);
-          });
-          onSuccess();
-        } else {
-          onError('Selected file is invalid');
-        }
-      }
-    } catch (e) {
-      onError('Error picking media: $e');
-    }
-  }
-
-  Future<void> _pickDueDate({
-    required VoidCallback onSuccess,
-  }) async {
+  Future<void> _pickDueDate({required VoidCallback onSuccess}) async {
     final initialDate = _dueDateController.text.isNotEmpty
         ? DateTime.tryParse(_dueDateController.text) ?? DateTime.now()
         : DateTime.now();
@@ -235,32 +212,21 @@ class _TaskCreationPageState extends State<TaskCreationPage>
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  TextFormField(
+                  TextFieldWidget(
                     controller: _titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Title',
-                      border: OutlineInputBorder(),
-                    ),
+                    hintText: 'Title',
                     validator: (value) =>
                         value!.isEmpty ? 'Title is required' : null,
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(
+                  TextFieldWidget(
                     controller: _descriptionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Description',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 3,
+                    hintText: 'Description',
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(
+                  TextFieldWidget(
                     controller: _dueDateController,
-                    decoration: const InputDecoration(
-                      labelText: 'Due Date (YYYY-MM-DD)',
-                      border: OutlineInputBorder(),
-                      suffixIcon: Icon(Icons.calendar_today),
-                    ),
+                    hintText: 'Due Date (YYYY-MM-DD)',
                     readOnly: true,
                     onTap: () => _pickDueDate(onSuccess: () {}),
                     validator: (value) {
@@ -276,9 +242,22 @@ class _TaskCreationPageState extends State<TaskCreationPage>
                   const SizedBox(height: 16),
                   DropdownButtonFormField<TaskStatus>(
                     value: _status,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Status',
-                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     items: TaskStatus.values
                         .map(
@@ -288,11 +267,7 @@ class _TaskCreationPageState extends State<TaskCreationPage>
                           ),
                         )
                         .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => _status = value);
-                      }
-                    },
+                    onChanged: (value) => setState(() => _status = value!),
                   ),
                   const SizedBox(height: 16),
                   BlocBuilder<TaskBloc, TaskState>(
@@ -315,12 +290,31 @@ class _TaskCreationPageState extends State<TaskCreationPage>
                               items: [],
                               decoration: InputDecoration(
                                 labelText: 'Category',
-                                border: OutlineInputBorder(),
+                                filled: true,
+                                fillColor: Colors.grey[200],
+                                border: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.white,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.white,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.white,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                               onChanged: null,
                             ),
-                            SizedBox(height: 16),
-                            Center(child: CircularProgressIndicator()),
+                            const SizedBox(height: 16),
+                            const Center(child: CircularProgressIndicator()),
                           ],
                         );
                       } else if (state is TaskError) {
@@ -328,9 +322,22 @@ class _TaskCreationPageState extends State<TaskCreationPage>
                       }
                       return DropdownButtonFormField<Category>(
                         value: _selectedCategory,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Category',
-                          border: OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                          border: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.white),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.white),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.white),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         items: categories.isEmpty
                             ? [
@@ -351,119 +358,47 @@ class _TaskCreationPageState extends State<TaskCreationPage>
                                     ),
                                   )
                                   .toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() => _selectedCategory = value);
-                          }
-                        },
+                        onChanged: (value) =>
+                            setState(() => _selectedCategory = value),
                         validator: (value) =>
                             value == null ? 'Category is required' : null,
                       );
                     },
                   ),
                   const SizedBox(height: 16),
-                  OutlinedButton(
-                    onPressed: () => _pickMedia(
-                      onSuccess: () {},
-                      onError: (message) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(message)),
-                          );
-                        }
-                      },
-                    ),
-                    child: const Text('Pick Image from Gallery'),
-                  ),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _mediaFiles
-                        .asMap()
-                        .entries
-                        .map(
-                          (entry) => Stack(
-                            children: [
-                              Image.file(
-                                entry.value,
-                                width: 100,
-                                height: 100,
-                                fit: BoxFit.cover,
-                              ),
-                              Positioned(
-                                top: 0,
-                                right: 0,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _mediaFiles.removeAt(entry.key);
-                                    });
-                                  },
-                                  child: Container(
-                                    decoration: const BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.close,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                        .toList(),
+                  MediaPickerWidget(
+                    mediaFiles: _mediaFiles,
+                    onAdd: (file) => setState(() => _mediaFiles.add(file)),
+                    onRemove: (index) =>
+                        setState(() => _mediaFiles.removeAt(index)),
                   ),
                   const SizedBox(height: 16),
                   BlocBuilder<TaskBloc, TaskState>(
                     buildWhen: (previous, current) =>
                         previous is TaskLoading != current is TaskLoading,
                     builder: (context, state) {
-                      return ElevatedButton(
-                        onPressed: _isSaving || state is TaskLoading
-                            ? null
-                            : () => _saveTask(
-                                context: context,
-                                onSuccess: () {
-                                  if (mounted) {
-                                    if (GoRouter.of(context).canPop()) {
-                                      GoRouter.of(context).pop();
-                                    } else {
-                                      GoRouter.of(context).go('/');
-                                    }
-                                  }
-                                },
-                                onError: (message) {
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(message)),
-                                    );
-                                  }
-                                },
-                              ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 16,
-                            horizontal: 32,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                      return ButtonWidget(
+                        text: widget.taskId == null ? 'Create' : 'Update',
+                        isLoading: _isSaving || state is TaskLoading,
+                        onPressed: () => _saveTask(
+                          context: context,
+                          onSuccess: () {
+                            if (mounted) {
+                              if (GoRouter.of(context).canPop()) {
+                                GoRouter.of(context).pop();
+                              } else {
+                                GoRouter.of(context).go('/');
+                              }
+                            }
+                          },
+                          onError: (message) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(message)),
+                              );
+                            }
+                          },
                         ),
-                        child: _isSaving
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Text(widget.taskId == null ? 'Create' : 'Update'),
                       );
                     },
                   ),

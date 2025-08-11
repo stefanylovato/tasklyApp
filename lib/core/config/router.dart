@@ -4,7 +4,7 @@ import 'package:taskly/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:taskly/features/auth/presentation/blocs/auth_state.dart';
 import 'package:taskly/features/auth/presentation/view/login_page.dart';
 import 'package:taskly/features/auth/presentation/view/register_page.dart';
-import 'package:taskly/features/home/presentation/home_page.dart';
+import 'package:taskly/features/home/presentation/view/home_page.dart';
 import 'package:taskly/features/tasks/presentation/view/category_management_page.dart';
 import 'package:taskly/features/tasks/presentation/view/task_creation_page.dart';
 

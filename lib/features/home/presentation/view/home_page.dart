@@ -1,0 +1,297 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:taskly/core/widgets/logo_widget.dart';
+import 'package:taskly/features/auth/presentation/blocs/auth_bloc.dart';
+import 'package:taskly/features/auth/presentation/blocs/auth_event.dart';
+import 'package:taskly/features/auth/presentation/blocs/auth_state.dart';
+import 'package:taskly/features/tasks/domain/entities/task_entity.dart';
+import 'package:taskly/features/tasks/domain/entities/category_entity.dart';
+import 'package:taskly/features/tasks/presentation/blocs/task_bloc.dart';
+import 'package:taskly/features/tasks/presentation/blocs/task_event.dart';
+import 'package:taskly/features/tasks/presentation/blocs/task_state.dart';
+import 'dart:async';
+import 'package:taskly/features/home/presentation/view/components/task_card_widget.dart';
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+  final Map<String, GlobalKey<FormState>> _formKeys = {};
+  final Map<String, TextEditingController> _titleControllers = {};
+  final Map<String, TextEditingController> _descriptionControllers = {};
+  final Map<String, TextEditingController> _dueDateControllers = {};
+  final Map<String, TaskStatus> _statusMap = {};
+  final Map<String, Category?> _categoryMap = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTasks();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadTasks();
+  }
+
+  void _loadTasks() {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      context.read<TaskBloc>().add(LoadTasksEvent(authState.user.uid));
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounce?.cancel();
+    _titleControllers.forEach((_, controller) => controller.dispose());
+    _descriptionControllers.forEach((_, controller) => controller.dispose());
+    _dueDateControllers.forEach((_, controller) => controller.dispose());
+    super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      final authState = context.read<AuthBloc>().state;
+      if (authState is AuthAuthenticated) {
+        context.read<TaskBloc>().add(
+          FilterTasksEvent(value, authState.user.uid),
+        );
+      }
+    });
+  }
+
+  void _saveTask(Task task) {
+    final formKey = _formKeys[task.id];
+    if (formKey != null && formKey.currentState!.validate()) {
+      final updatedTask = Task(
+        id: task.id,
+        userId: task.userId,
+        title: _titleControllers[task.id]!.text,
+        description: _descriptionControllers[task.id]!.text,
+        dueDate: DateTime.parse(_dueDateControllers[task.id]!.text),
+        categoryId: _categoryMap[task.id]!.id,
+        categoryName: _categoryMap[task.id]!.name,
+        status: _statusMap[task.id]!,
+        mediaUrls: task.mediaUrls,
+      );
+      context.read<TaskBloc>().add(UpdateTaskEvent(updatedTask));
+    }
+  }
+
+  void _updateStatus(String taskId, TaskStatus status) {
+    setState(() => _statusMap[taskId] = status);
+  }
+
+  void _updateCategory(String taskId, Category? category) {
+    setState(() => _categoryMap[taskId] = category);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthUnauthenticated) {
+          context.go('/login');
+        } else if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${state.message}')),
+          );
+        }
+      },
+      child: BlocListener<TaskBloc, TaskState>(
+        listener: (context, state) {
+          if (state is TaskError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: ${state.message}')),
+            );
+          } else if (state is TaskLoaded && state.operationCompleted != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  state.operationCompleted == 'created'
+                      ? 'Task created'
+                      : state.operationCompleted == 'updated'
+                      ? 'Task updated'
+                      : state.operationCompleted == 'deleted'
+                      ? 'Task deleted'
+                      : state.operationCompleted == 'category_created'
+                      ? 'Category created'
+                      : state.operationCompleted == 'category_updated'
+                      ? 'Category updated'
+                      : 'Category deleted',
+                ),
+              ),
+            );
+          }
+        },
+        child: Scaffold(
+          backgroundColor: Colors.grey[300],
+          appBar: AppBar(
+            title: Row(
+              children: [
+                LogoWidget(isCompact: true),
+                const Spacer(),
+              ],
+            ),
+            backgroundColor: Colors.orange,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.logout, color: Colors.white),
+                onPressed: () {
+                  context.read<AuthBloc>().add(AuthLogoutEvent());
+                },
+                tooltip: 'Logout',
+              ),
+            ],
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            backgroundColor: Colors.orange,
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Colors.white,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.category),
+                label: 'Categories',
+              ),
+              BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Add Task'),
+            ],
+            onTap: (index) {
+              if (index == 0) {
+                context.go('/category-management');
+              } else {
+                context.go('/task-creation');
+              }
+            },
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    border: Border.all(color: Colors.white),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: const InputDecoration(
+                      hintText: 'Search tasks...',
+                      prefixIcon: Icon(Icons.search),
+                      border: InputBorder.none,
+                    ),
+                    onChanged: _onSearchChanged,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: BlocBuilder<TaskBloc, TaskState>(
+                    buildWhen: (previous, current) =>
+                        (current is TaskLoading && previous is! TaskLoading) ||
+                        (current is TaskLoaded &&
+                            (previous is! TaskLoaded ||
+                                previous.tasks != current.tasks ||
+                                previous.filteredTasks !=
+                                    current.filteredTasks)) ||
+                        (current is TaskError && previous is! TaskError),
+                    builder: (context, state) {
+                      if (state is TaskLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (state is TaskLoaded) {
+                        final tasks = state.filteredTasks;
+                        final categories = state.categories;
+                        if (tasks.isEmpty) {
+                          return const Center(child: Text('No tasks found'));
+                        }
+                        return ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: tasks.length,
+                          itemBuilder: (context, index) {
+                            final task = tasks[index];
+                            if (!_formKeys.containsKey(task.id)) {
+                              _formKeys[task.id] = GlobalKey<FormState>();
+                              _titleControllers[task.id] =
+                                  TextEditingController(text: task.title);
+                              _descriptionControllers[task.id] =
+                                  TextEditingController(text: task.description);
+                              _dueDateControllers[task.id] =
+                                  TextEditingController(
+                                    text: task.dueDate
+                                        .toIso8601String()
+                                        .split('T')
+                                        .first,
+                                  );
+                              _statusMap[task.id] = task.status;
+                              _categoryMap[task.id] = categories.firstWhere(
+                                (c) => c.id == task.categoryId,
+                                orElse: () => Category(
+                                  id: task.categoryId,
+                                  userId: task.userId,
+                                  name: task.categoryName,
+                                ),
+                              );
+                            }
+                            return TaskCardWidget(
+                              task: task,
+                              onDelete: () => context.read<TaskBloc>().add(
+                                DeleteTaskEvent(task.id, task.userId),
+                              ),
+                              onSave: () => _saveTask(task),
+                              onCancel: () {
+                                setState(() {
+                                  _titleControllers[task.id]!.text = task.title;
+                                  _descriptionControllers[task.id]!.text =
+                                      task.description;
+                                  _dueDateControllers[task.id]!.text = task
+                                      .dueDate
+                                      .toIso8601String()
+                                      .split('T')
+                                      .first;
+                                  _statusMap[task.id] = task.status;
+                                  _categoryMap[task.id] = categories.firstWhere(
+                                    (c) => c.id == task.categoryId,
+                                    orElse: () => Category(
+                                      id: task.categoryId,
+                                      userId: task.userId,
+                                      name: task.categoryName,
+                                    ),
+                                  );
+                                });
+                              },
+                              titleController: _titleControllers[task.id]!,
+                              descriptionController:
+                                  _descriptionControllers[task.id]!,
+                              dueDateController: _dueDateControllers[task.id]!,
+                              onStatusChanged: (status) =>
+                                  _updateStatus(task.id, status),
+                              onCategoryChanged: (category) =>
+                                  _updateCategory(task.id, category),
+                            );
+                          },
+                        );
+                      } else if (state is TaskError) {
+                        return Center(child: Text('Error: ${state.message}'));
+                      }
+                      return const Center(child: Text('No tasks loaded'));
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

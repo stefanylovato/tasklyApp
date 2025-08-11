@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:taskly/core/widgets/button_widget.dart';
+import 'package:taskly/core/widgets/logo_widget.dart';
+import 'package:taskly/core/widgets/text_field_widget.dart';
 import 'package:taskly/features/auth/presentation/blocs/auth_bloc.dart';
 import 'package:taskly/features/auth/presentation/blocs/auth_event.dart';
 import 'package:taskly/features/auth/presentation/blocs/auth_state.dart';
+import 'package:taskly/features/auth/presentation/view/components/link_row_widget.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -45,125 +48,41 @@ class _LoginPageState extends State<LoginPage> {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Taskly logo
-                    Icon(
-                      Icons.task_outlined,
-                      size: 80,
-                      color: Colors.orange,
+                    LogoWidget(
+                      fontSize: 68,
+                      subtitle: 'Organize your days',
                     ),
-                    Text(
-                      'Taskly',
-                      style: GoogleFonts.mulish(
-                        fontSize: 68,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    TextFieldWidget(
+                      controller: _emailController,
+                      hintText: 'Email',
+                      keyboardType: TextInputType.emailAddress,
                     ),
-                    Text(
-                      'Organize your days',
-                      style: TextStyle(fontSize: 20),
+                    const SizedBox(height: 10),
+                    TextFieldWidget(
+                      controller: _passwordController,
+                      hintText: 'Password',
+                      obscureText: true,
                     ),
-                    SizedBox(height: 40),
-
-                    // Email textfield
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          border: Border.all(color: Colors.white),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 20.0),
-                          child: TextField(
-                            controller: _emailController,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Email',
-                            ),
-                            keyboardType: TextInputType.emailAddress,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-
-                    // Password textfield
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          border: Border.all(color: Colors.white),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 20.0),
-                          child: TextField(
-                            controller: _passwordController,
-                            obscureText: true,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Password',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-
-                    // Loading indicator or Sign In button
+                    const SizedBox(height: 10),
                     if (state is AuthLoading)
-                      CircularProgressIndicator()
+                      const CircularProgressIndicator()
                     else
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 25),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            context.read<AuthBloc>().add(
-                              AuthLoginEvent(
-                                _emailController.text.trim(),
-                                _passwordController.text.trim(),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      ButtonWidget(
+                        text: 'Sign In',
+                        onPressed: () {
+                          context.read<AuthBloc>().add(
+                            AuthLoginEvent(
+                              _emailController.text.trim(),
+                              _passwordController.text.trim(),
                             ),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'Sign In',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                            ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
-                    SizedBox(height: 20),
-
-                    // Register link
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Don\'t have an account? '),
-                        GestureDetector(
-                          onTap: () => context.go('/register'),
-                          child: Text(
-                            'Register now!',
-                            style: TextStyle(
-                              color: Colors.blue,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 20),
+                    LinkRowWidget(
+                      mainText: 'Don\'t have an account? ',
+                      linkText: 'Register now!',
+                      route: '/register',
                     ),
                   ],
                 );
