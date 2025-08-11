@@ -45,46 +45,49 @@ class _LoginPageState extends State<LoginPage> {
                 }
               },
               builder: (context, state) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    LogoWidget(
-                      fontSize: 68,
-                      subtitle: 'Organize your days',
-                    ),
-                    TextFieldWidget(
-                      controller: _emailController,
-                      hintText: 'Email',
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    const SizedBox(height: 10),
-                    TextFieldWidget(
-                      controller: _passwordController,
-                      hintText: 'Password',
-                      obscureText: true,
-                    ),
-                    const SizedBox(height: 10),
-                    if (state is AuthLoading)
-                      const CircularProgressIndicator()
-                    else
-                      ButtonWidget(
-                        text: 'Sign In',
-                        onPressed: () {
-                          context.read<AuthBloc>().add(
-                            AuthLoginEvent(
-                              _emailController.text.trim(),
-                              _passwordController.text.trim(),
-                            ),
-                          );
-                        },
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      LogoWidget(
+                        fontSize: 68,
+                        subtitle: 'Organize your days',
                       ),
-                    const SizedBox(height: 20),
-                    LinkRowWidget(
-                      mainText: 'Don\'t have an account? ',
-                      linkText: 'Register now!',
-                      route: '/register',
-                    ),
-                  ],
+                      TextFieldWidget(
+                        controller: _emailController,
+                        hintText: 'Email',
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 10),
+                      TextFieldWidget(
+                        controller: _passwordController,
+                        hintText: 'Password',
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 10),
+                      if (state is AuthLoading)
+                        const CircularProgressIndicator()
+                      else
+                        ButtonWidget(
+                          text: 'Sign In',
+                          onPressed: () {
+                            context.read<AuthBloc>().add(
+                              AuthLoginEvent(
+                                _emailController.text.trim(),
+                                _passwordController.text.trim(),
+                              ),
+                            );
+                          },
+                        ),
+                      const SizedBox(height: 20),
+                      LinkRowWidget(
+                        mainText: 'Don\'t have an account? ',
+                        linkText: 'Register now!',
+                        route: '/register',
+                      ),
+                    ],
+                  ),
                 );
               },
             ),

@@ -17,40 +17,41 @@ class LogoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return isCompact
-        ? Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.task_outlined, size: 30, color: color),
-              const SizedBox(width: 8),
-              Text(
-                'Taskly',
-                style: GoogleFonts.mulish(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-              ),
-            ],
-          )
-        : Column(
-            children: [
-              Icon(Icons.task_outlined, size: 80, color: color),
-              Text(
-                'Taskly',
-                style: GoogleFonts.mulish(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-              ),
-              if (subtitle.isNotEmpty)
-                Text(
-                  subtitle,
-                  style: const TextStyle(fontSize: 20),
-                ),
-              const SizedBox(height: 40),
-            ],
-          );
+    if (isCompact) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.task_outlined, size: 30, color: Colors.black),
+          const SizedBox(width: 8),
+          Text(
+            'Taskly',
+            style: GoogleFonts.mulish(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      );
+    }
+    return Column(
+      children: [
+        Icon(Icons.task_outlined, size: 80, color: Colors.orange),
+        Text(
+          'Taskly',
+          style: GoogleFonts.mulish(
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        if (subtitle.isNotEmpty)
+          Text(
+            subtitle,
+            style: const TextStyle(fontSize: 20),
+          ),
+        const SizedBox(height: 40),
+      ],
+    );
   }
 }

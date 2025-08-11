@@ -84,74 +84,77 @@ class _RegisterPageState extends State<RegisterPage> {
                 }
               },
               builder: (context, state) {
-                return Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      LogoWidget(
-                        fontSize: 68,
-                        subtitle: 'Register below',
-                      ),
-                      TextFieldWidget(
-                        controller: _nameController,
-                        hintText: 'Name',
-                        validator: _validateName,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFieldWidget(
-                        controller: _emailController,
-                        hintText: 'Email',
-                        keyboardType: TextInputType.emailAddress,
-                        validator: _validateEmail,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFieldWidget(
-                        controller: _passwordController,
-                        hintText: 'Password',
-                        obscureText: true,
-                        validator: _validatePassword,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFieldWidget(
-                        controller: _confirmPasswordController,
-                        hintText: 'Confirm password',
-                        obscureText: true,
-                        validator: _validateConfirmPassword,
-                      ),
-                      const SizedBox(height: 10),
-                      if (state is AuthLoading)
-                        const CircularProgressIndicator()
-                      else
-                        ButtonWidget(
-                          text: 'Sign Up',
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              context.read<AuthBloc>().add(
-                                AuthRegisterEvent(
-                                  _nameController.text.trim(),
-                                  _emailController.text.trim(),
-                                  _passwordController.text.trim(),
-                                ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Please correct the errors in the form',
-                                  ),
-                                ),
-                              );
-                            }
-                          },
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        LogoWidget(
+                          fontSize: 68,
+                          subtitle: 'Register below',
                         ),
-                      const SizedBox(height: 20),
-                      LinkRowWidget(
-                        mainText: 'I\'m already a member. ',
-                        linkText: 'Login now!',
-                        route: '/login',
-                      ),
-                    ],
+                        TextFieldWidget(
+                          controller: _nameController,
+                          hintText: 'Name',
+                          validator: _validateName,
+                        ),
+                        const SizedBox(height: 10),
+                        TextFieldWidget(
+                          controller: _emailController,
+                          hintText: 'Email',
+                          keyboardType: TextInputType.emailAddress,
+                          validator: _validateEmail,
+                        ),
+                        const SizedBox(height: 10),
+                        TextFieldWidget(
+                          controller: _passwordController,
+                          hintText: 'Password',
+                          obscureText: true,
+                          validator: _validatePassword,
+                        ),
+                        const SizedBox(height: 10),
+                        TextFieldWidget(
+                          controller: _confirmPasswordController,
+                          hintText: 'Confirm password',
+                          obscureText: true,
+                          validator: _validateConfirmPassword,
+                        ),
+                        const SizedBox(height: 10),
+                        if (state is AuthLoading)
+                          const CircularProgressIndicator()
+                        else
+                          ButtonWidget(
+                            text: 'Sign Up',
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                context.read<AuthBloc>().add(
+                                  AuthRegisterEvent(
+                                    _nameController.text.trim(),
+                                    _emailController.text.trim(),
+                                    _passwordController.text.trim(),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Please correct the errors in the form',
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        const SizedBox(height: 20),
+                        LinkRowWidget(
+                          mainText: 'I\'m already a member. ',
+                          linkText: 'Login now!',
+                          route: '/login',
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

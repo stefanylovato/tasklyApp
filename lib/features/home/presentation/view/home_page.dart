@@ -140,7 +140,9 @@ class _HomePageState extends State<HomePage> {
           appBar: AppBar(
             title: Row(
               children: [
-                LogoWidget(isCompact: true),
+                LogoWidget(
+                  isCompact: true,
+                ),
                 const Spacer(),
               ],
             ),
